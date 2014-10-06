@@ -1,0 +1,113 @@
+<div class="app-wrap row">
+  <div class="col-sm-6">
+  <h2>Models</h2>
+  <ul class="list-unstyled">
+    {{#each item in model}}
+      <li class="model-list-item">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              {{item.name}}
+              <button type="button" {{action "removeModel" item}} class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Delete</span></button>
+            </h3>
+
+          </div>
+
+          <div class="panel-body">
+            <ul class="list-unstyled">
+              {{#each item.fields itemController="field"}}
+                <li class="row">
+                  {{partial "field"}}
+                </li>
+              {{else}}
+                <li>
+                  <p class="text-warning">No model attributes. Try using the 'Add Field' button below.</p>
+                </li>
+              {{/each}}
+            </ul>
+          </div>
+
+          <div class="panel-footer">
+            <button type="button" {{action "newField" item}} class="btn btn-sm btn-block btn-primary">&plus; Add Field</button>
+          </div>
+        </div>
+      </li>
+    {{/each}}
+
+    {{#if creatingNewModel}}
+      <li>{{view "new-model-field" class="form-control" placeholder="New Model Name"}}</li>
+    {{else}}
+      <li><button {{action "newModel"}} class="btn btn-lg btn-success" type="button">&plus; Add Model</button></li>
+    {{/if}}
+  </ul>
+  </div>
+
+  <div class="col-sm-6">
+  <h2>Model Definitions</h2>
+
+  <form class="form-horizontal" role="form">
+    <div class="row form-group">
+      <label for="format-select" class="col-sm-2 control-label">Format:</label>
+      <div class="col-sm-9">
+        {{view Ember.Select id="format-select" content=modelFormatOptions value=modelFormat class="form-control"}}
+      </div>
+    </div>
+  </form>
+
+  <ul class="code-div well well-sm">
+    {{#if modelObjects}}
+      {{#each model in modelObjects}}
+        <li class="form-group">
+          {{#if isGlobalFormat}}
+            App.{{model.name}} = DS.Model.extend({<br>
+          {{else}}
+            <span class="text-muted">// app/models/{{str-dasherize model.name}}.js</span><br>
+            export default DS.Model.extend({<br>
+          {{/if}}
+          <ul>
+            {{#each model.fields}}
+              <li>
+                {{camelize-word name}}:
+                {{#if relatedTo}}DS.{{type}}('{{camelize-word relatedTo}}'){{else}}DS.attr('{{type}}'){{/if}}{{#unless lastField}},{{/unless}}
+              </li>
+            {{/each}}
+          </ul>
+        });</li>
+      {{/each}}
+    {{/if}}
+  </ul>
+  <br>
+
+  <h2>Expected JSON</h2>
+
+  <form class="form-horizontal" role="form">
+    <div class="row form-group">
+      <label for="adapter-select" class="col-sm-2 control-label">Adapter:</label>
+      <div class="col-sm-9">
+        {{view Ember.Select id="adapter-select" content=adapterOptions value=adapter class="form-control"}}
+      </div>
+    </div>
+  </form>
+
+  {{#if jsonObjects}}
+    <ul class="code-div well well-sm form-group">
+     {{#each jsonObjects}}
+       <li>
+       "{{format-model-name this.name}}": [{
+         <ul>
+           <li>"id": 1,</li>
+           {{#each fields}}
+             <li>"{{this.name}}": {{placeholder-value this}}{{#unless lastField}},{{/unless}}</li>
+           {{/each}}
+         </ul>
+       }]{{#unless lastModel}},{{/unless}}
+       </li>
+     {{/each}}
+    </ul>
+  {{/if}}
+  </div>
+</div>
+
+<footer class="app-footer text-center">
+  <div class="center-block">Created and maintained by <a href="http://www.twitter.com/unheardmyth">@unheardmyth</a>, with the help of some pretty awesome <a href="https://github.com/unheardmyth/ember-ui/graphs/contributors">contributors</a>.</div>
+</footer>
